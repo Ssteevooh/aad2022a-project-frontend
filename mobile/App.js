@@ -29,21 +29,30 @@ const client = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-function HomeScreen({ navigation }) {
+function HomeScreen() {
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Button
-                onPress={() => navigation.navigate('Notifications')}
-                title="Go to notifications"
-            />
         </View>
     );
 }
 
-function NotificationsScreen({ navigation }) {
+function UserScreen() {
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Button onPress={() => navigation.goBack()} title="Go back home" />
+        </View>
+    );
+}
+
+function FamilyScreen() {
+    return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        </View>
+    );
+}
+
+function SignOut() {
+    return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         </View>
     );
 }
@@ -56,7 +65,9 @@ export default function App() {
             <NavigationContainer>
                 <Drawer.Navigator initialRouteName="Home">
                     <Drawer.Screen name="Home" component={HomeScreen} />
-                    <Drawer.Screen name="Notifications" component={NotificationsScreen} />
+                    <Drawer.Screen name="User" component={UserScreen} />
+                    <Drawer.Screen name="Family" component={FamilyScreen} />
+                    <Drawer.Screen name="Sign Out" component={SignOut} />
                 </Drawer.Navigator>
             </NavigationContainer>
         </ApolloProvider>
