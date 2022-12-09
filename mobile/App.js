@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import { Button, View } from 'react-native';
+import { View, Text, TextInput, Button } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
@@ -36,9 +36,10 @@ function HomeScreen() {
     );
 }
 
-function UserScreen() {
+function UserScreen({ navigation }) {
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Button onPress={() => navigation.navigate('Home')} title='Modify'/>
         </View>
     );
 }
