@@ -1,10 +1,10 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
-const Family = () => {
+const Item = () => {
   return (
     <View style={styles.center}>
-      <Text>This is the Family screen</Text>
+      <Text>This is Item</Text>
     </View>
   );
 };
@@ -18,4 +18,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Family;
+export default Item;

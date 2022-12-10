@@ -22,11 +22,8 @@ const SignIn = () => {
             );
         }
     });
-
     if (loading) return <Loading />;
-
     if (error) return <Text>{JSON.stringify(error)}</Text>
-
     return (
         <React.Fragment>
             <UserForm action={signIn} fromType="signIn" />
