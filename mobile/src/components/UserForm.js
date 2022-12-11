@@ -51,7 +51,7 @@ const UserForm = props => {
                 <Text>Sign In</Text>
             </TouchableOpacity>
             {props.formType !== 'signUp' && (
-                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
                     <Text>
                         Not a member? <Text>Create one!</Text>
                     </Text>
