@@ -1,23 +1,19 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-
-import { UnAuthenticatedStackScreen } from '../components/StackNavigator';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import AuthenticatedTabScreen from '../components/TabNavigator';
-import AuthenticatedDrawerScreen from '../components/DrawerNavigator';
 
-const AllStack = createStackNavigator();
+import User from './user';
+import SignOut from './signout';
+
+const Drawer = createDrawerNavigator();
+
 
 export default function AllScreens() {
     return (
-        <AllStack.Navigator>
-            {/*
-            <AllStack.Screen name='UnAuthenticatedStackScreen' component={UnAuthenticatedStackScreen}
-                options={{ headerShown: false}} />
-            */}
-            <AllStack.Screen name='AuthenticatedTabScreen' component={AuthenticatedTabScreen}
-                options={{ headerShown: false}} />
-            <AllStack.Screen name='AuthenticatedDrawerScreen' component={AuthenticatedDrawerScreen}
-                options={{ headerShown: false}} />
-        </AllStack.Navigator>
+        <Drawer.Navigator initialRouteName="User">
+            <Drawer.Screen name="Main Screen" component={AuthenticatedTabScreen} />
+            <Drawer.Screen name="User" component={User} />
+            <Drawer.Screen name="Sign Out" component={SignOut} />
+        </Drawer.Navigator>
     )
 };
