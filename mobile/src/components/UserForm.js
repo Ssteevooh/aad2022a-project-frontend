@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const UserForm = props => {
@@ -10,7 +10,6 @@ const UserForm = props => {
     const navigation = useNavigation();
 
     const handleSubmit = () => {
-        console.log(name, email, password);
         props.action({
             variables: {
                 name: name,
@@ -52,16 +51,19 @@ const UserForm = props => {
                 textContentType="password"
                 secureTextEntry={true}
             />
-            <TouchableOpacity disabled={!email || !password} onPress={handleSubmit}>
-            {props.formType === 'signUp' ? <Text>Sign Up</Text> : <Text>Sign In</Text>}
-            </TouchableOpacity>
-            {props.formType !== 'signUp' && (
-                <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                    <Text>
-                        Not a member? <Text>Create one!</Text>
-                    </Text>
-                </TouchableOpacity>
-            )}
+            <View style={styles.loginButton}>
+                <Button
+                    color="#0077aa"
+                    title={props.formType === 'signUp' ? 'Sign Up' : 'Sign In'}
+                    disabled={!email || !password || (props.formType === 'signUp' ? !name : false)}
+                    onPress={() => handleSubmit()}
+                />
+            </View>
+            <View style={styles.loginButton}>
+                {props.formType !== 'signUp' && (
+                    <Button color='#0077aa' title={'Not a member? Create one!'} onPress={() => navigation.navigate('SignUp')} />
+                )}
+            </View>
         </View>
     );
 };
@@ -76,7 +78,8 @@ const styles = StyleSheet.create({
         border: 1,
         fontSize: 18,
         padding: 8,
-        marginBottom: 24
+        marginBottom: 24,
+        backgroundColor: '#8C888833',
     },
     formlabel: {
         fontSize: 18,
@@ -92,5 +95,9 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
         fontSize: 18
+    },
+    loginButton: {
+        width: 150,
+        marginBottom: 15,
     }
 });

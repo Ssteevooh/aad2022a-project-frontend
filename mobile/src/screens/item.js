@@ -7,7 +7,7 @@ import Modal from "react-native-modal";
 import SelectDropdown from 'react-native-select-dropdown'
 
 const GET_SHOPPING_LIST_CONTENT = gql`
-  query {
+  query ($shopping_list_id: ID!){
     getShoppingListContent(shopping_list_id: $shopping_list_id) {
       item {
         name
@@ -65,11 +65,13 @@ const Item = props => {
         tempList.push(element.name);
       }
       setListItemOptions([...tempList])
-    } else {
-      shoppingListQuery.refetch();
     }
   }, [open])
 
+  if (shoppingListQuery.loading) return <Text> Loading...</Text>
+  if (shoppingListQuery.error) {
+    return <Text> Error fetching items</Text>
+  }
   return (
     <>
       <View style={styles.center}>

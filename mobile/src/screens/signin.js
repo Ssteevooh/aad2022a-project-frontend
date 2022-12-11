@@ -28,7 +28,7 @@ const SignIn = () => {
         }
     });
     if (loading) return <Loading />;
-    if (error) return <Text>{JSON.stringify(error)}</Text>
+    if (error) alert(JSON.stringify(error.message))
     return (
         <React.Fragment>
             <UserForm action={signIn} formType="signIn" />

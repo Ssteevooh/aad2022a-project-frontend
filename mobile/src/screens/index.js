@@ -12,9 +12,9 @@ export default function AllScreens() {
     return (
         <AllStack.Navigator>
             {
-                loggedIn ? <AllStack.Screen name='AuthenticatedDrawerScreen' component={AuthenticatedDrawerScreen}
-                    options={{ title: 'AuthenticatedDrawerScreen', headerShown: false }} /> : <AllStack.Screen name='UnAuthenticatedStackScreen' component={UnAuthenticatedStackScreen}
-                        options={{ title: 'UnAuthenticatedStackScreen', headerShown: false }} />
+                loggedIn 
+                ? <AllStack.Screen name='AuthenticatedDrawerScreen' component={AuthenticatedDrawerScreen} options={{ title: 'AuthenticatedDrawerScreen', headerShown: false }} />
+                : <AllStack.Screen name='UnAuthenticatedStackScreen' component={UnAuthenticatedStackScreen} options={{ title: 'UnAuthenticatedStackScreen', headerShown: false }} />
             }
 
 

@@ -19,9 +19,9 @@ query {
 const ShoppingList = ({ navigation }) => {
 
   const { loading, error, data } = useQuery(GET_MY_SHOPPING_LISTS);
-  if (loading) return <Text>Loading...</Text>//<Loading />;
+  if (loading) return <Text>Loading...</Text>;
   if (error) return <Text>Error loading notes</Text>;
-  console.log(data.getMyShoppingLists);
+
   return (
     <ShoppingListComponent shoppingLists={data.getMyShoppingLists} navigation={navigation} />
   );
