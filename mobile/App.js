@@ -8,7 +8,8 @@ import * as SecureStore from 'expo-secure-store';
 
 import getEnvVars from './config';
 
-import Screens from './src/screens/index';
+import HomeStack from './src/screens/HomeStack';
+import AuthStack from './src/screens/AuthStack';
 
 const { API_URI } = getEnvVars();
 
@@ -63,14 +64,13 @@ const Drawer = createDrawerNavigator();
 export default function App() {
     return (
         <ApolloProvider client={client}>
-            <NavigationContainer>
-                <Drawer.Navigator initialRouteName="Home">
-                    <Drawer.Screen name="Home" component={HomeScreen} />
-                    <Drawer.Screen name="User" component={UserScreen} />
-                    <Drawer.Screen name="Family" component={FamilyScreen} />
-                    <Drawer.Screen name="Sign Out" component={SignOut} />
-                </Drawer.Navigator>
-            </NavigationContainer>
+        <NavigationContainer>
+            {/* TODO: Jos ei autentikoitu mene authstack */}
+            <AuthStack/>
+            {/* TODO: Jos autentikointi on, mene homeen */}
+            {/* <HomeStack/> */}
+            
+        </NavigationContainer>
         </ApolloProvider>
     );
 };
