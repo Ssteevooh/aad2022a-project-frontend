@@ -1,6 +1,4 @@
 import 'react-native-gesture-handler';
-import { View, Text, TextInput, Button } from 'react-native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
 import { setContext } from 'apollo-link-context';
@@ -29,37 +27,6 @@ const client = new ApolloClient({
     link: authLink.concat(httpLink),
     cache: new InMemoryCache()
 });
-
-function HomeScreen() {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        </View>
-    );
-}
-
-function UserScreen({ navigation }) {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Button onPress={() => navigation.navigate('Home')} title='Modify'/>
-        </View>
-    );
-}
-
-function FamilyScreen() {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        </View>
-    );
-}
-
-function SignOut() {
-    return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        </View>
-    );
-}
-
-const Drawer = createDrawerNavigator();
 
 export default function App() {
     return (

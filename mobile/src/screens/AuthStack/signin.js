@@ -5,7 +5,7 @@ import { useMutation, gql } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
 import UserForm from '../../components/UserForm';
-//import Loading from '../../components/'
+import Loading from '../../components/Loading'
 
 const SIGNIN_USER = gql`
     mutation ($username: String!, $password: String!) {
@@ -23,10 +23,9 @@ const SignIn = () => {
         }
     });
 
-    if (loading) return <Text>loading</Text>;
+    if (loading) return <Loading/>;
 
     if (error) return <Text>{JSON.stringify(error)}</Text>
-
     return (
         <React.Fragment>
             <UserForm action={signIn} fromType="signIn" />

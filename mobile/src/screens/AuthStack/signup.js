@@ -5,7 +5,7 @@ import { useMutation, gql } from '@apollo/client';
 import { useNavigation } from '@react-navigation/native';
 
 import UserForm from '../../components/UserForm';
-//import Loading from '../components/Loading';
+import Loading from '../../components/Loading';
 
 const SIGNUP_USER = gql`
     mutation ($username: String!, $email: String!, $password: String!) {
@@ -23,7 +23,7 @@ const SignUp = () => {
         }
     });
 
-    if (loading) return <Text>loading</Text>;
+    if (loading) return <Loading/>;
 
     if (error) return <Text>{JSON.stringify(error)}</Text>
 
