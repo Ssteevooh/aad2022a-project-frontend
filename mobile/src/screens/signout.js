@@ -7,7 +7,7 @@ const SignOut = () => {
     const navigation = useNavigation();
     const signOut = async () => {
         SecureStore.deleteItemAsync('token').then(
-            navigation.navigate('UnAuthenticatedScreens')
+            navigation.navigate('UnAuthenticatedStackScreen')
         );
     };
     return (

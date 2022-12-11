@@ -18,7 +18,7 @@ const SignIn = () => {
     const [signIn, { loading, error }] = useMutation(SIGNIN_USER, {
         onCompleted: data => {
             SecureStore.setItemAsync('token', data.signIn).then(
-                navigation.navigate('AuthenticatedScreens')
+                navigation.navigate('AuthenticatedScreen')
             );
         }
     });
