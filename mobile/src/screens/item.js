@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, TextInput } from "react-native";
+import { View, Text, StyleSheet, Button, TextInput, FlatList, TouchableOpacity } from "react-native";
 import { useQuery, useMutation, gql } from '@apollo/client';
 
 import Modal from "react-native-modal";
@@ -7,7 +7,7 @@ import Modal from "react-native-modal";
 import SelectDropdown from 'react-native-select-dropdown'
 
 const GET_SHOPPING_LIST_CONTENT = gql`
-  query getShoppingListContent($shopping_list_id: ID!){
+  query {
     getShoppingListContent(shopping_list_id: $shopping_list_id) {
       item {
         name
@@ -18,7 +18,7 @@ const GET_SHOPPING_LIST_CONTENT = gql`
       collected
       notes
       quantity
-      createdAt
+      id
     }
   }
 `;
@@ -34,9 +34,10 @@ const GET_ITEMS = gql`
 `;
 
 const CREATE_LIST_ITEM = gql`
-  mutation Mutation($shoppingListId: ID!, $itemId: ID!, $quantity: Int) {
-    createListItem(shopping_list_id: $shoppingListId, item_id: $itemId, quantity: $quantity) {
+  mutation Mutation($shopping_list_id: ID!, $item_id: ID!, $quantity: Int) {
+    createListItem(shopping_list_id: $shopping_list_id, item_id: $item_id, quantity: $quantity) {
       item {
+        id
         name
       }
     }
@@ -44,6 +45,7 @@ const CREATE_LIST_ITEM = gql`
 `;
 
 const Item = props => {
+  const shopping_list_id = props.route.params.id;
 
   const [open, setOpen] = useState(false);
 
@@ -51,9 +53,9 @@ const Item = props => {
   const [newListItemQuantity, setNewListItemQuantity] = useState(1);
   const [listItemOptions, setListItemOptions] = useState();
 
-  const shopping_list_id = props.route.params.id;
   const listItemQuery = useQuery(GET_ITEMS);
-  const { loading, error, data } = useQuery(GET_SHOPPING_LIST_CONTENT, { variables: { shopping_list_id } });
+  const shoppingListQuery = useQuery(GET_SHOPPING_LIST_CONTENT, { variables: { shopping_list_id }});
+  const [createListItemFunction, { data, loading, error }] = useMutation(CREATE_LIST_ITEM);
 
   useEffect(() => {
     if (open && listItemQuery.data) {
@@ -63,13 +65,37 @@ const Item = props => {
         tempList.push(element.name);
       }
       setListItemOptions([...tempList])
+    } else {
+      shoppingListQuery.refetch();
     }
-  },[open])
+  }, [open])
 
   return (
     <>
       <View style={styles.center}>
-        <Text>This is Item</Text>
+        <View>
+          {shoppingListQuery.data &&
+          <FlatList
+            data={shoppingListQuery.data.getShoppingListContent}
+            keyExtractor={({ id }) => id.toString()}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  console.log(item);
+                }
+                }
+              >
+                <View style={styles.feedView}>
+                  <Text> {item.item.name} </Text>
+                  <Text> Quantity: {item.quantity} </Text>
+                  <Text> {item.collected ? 'Collected': 'Needs to collected'} </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        }
+        </View>
       </View>
       <Button style={styles.button} onPress={() => setOpen(!open)} title="Add list item" />
       <Modal isVisible={open} onModalHide={() => {
@@ -105,7 +131,20 @@ const Item = props => {
             <Button style={styles.modalButton} onPress={() => setOpen(!open)} title="Close" />
           </View>
           <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
-            <Button disabled={!newListItem} style={styles.modalButton} title="Save"></Button>
+            <Button onPress={
+              () => {
+                createListItemFunction({
+                  variables: {
+                    shopping_list_id: shopping_list_id,
+                    item_id: newListItem,
+                    quantity: parseInt(newListItemQuantity)
+                  }
+                }).then(data => {
+                  shoppingListQuery.refetch();
+                  setOpen(false);
+                })
+              }}
+              disabled={!newListItem} style={styles.modalButton} title="Save"></Button>
           </View>
         </View>
       </Modal>
@@ -151,7 +190,19 @@ const styles = StyleSheet.create({
   formWrapper: {
     display: 'flex',
     flexDirection: 'row',
-  }
+  },
+  separator: {
+    height: 1,
+    width: '100%',
+    backgroundColor: '#ced0ce'
+  },
+  feedView: {
+    height: 100,
+    width: 300,
+    overflow: 'hidden',
+    marginBottom: 10,
+    backgroundColor: "#ced0ce"
+}
 });
 
 export default Item;
