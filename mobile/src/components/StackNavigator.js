@@ -22,7 +22,7 @@ const UnAuthenticatedStackScreen = () => {
 const ShoppingListStackScreen = () => {
     return (
         <Stack.Navigator initialRouteName='ShoppingList'>
-            <Stack.Screen name="Shopping List" component={ShoppingList} />
+            <Stack.Screen name="ShoppingList" component={ShoppingList} />
             <Stack.Screen name="Item" component={Item} />
         </Stack.Navigator>
     );

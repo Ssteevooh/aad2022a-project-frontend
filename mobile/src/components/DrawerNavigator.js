@@ -10,7 +10,9 @@ const Drawer = createDrawerNavigator();
 const AuthenticatedDrawerScreen = () => {
     return (
         <Drawer.Navigator initialRouteName="User">
-            <Drawer.Screen name='AuthenticatedTabScreen' component={AuthenticatedTabScreen} />
+            <Drawer.Screen name='AuthenticatedTabScreen' component={AuthenticatedTabScreen}  options={{
+                    title: 'Shopping Lists',
+                }}/>
             <Drawer.Screen name="User" component={User} />
             <Drawer.Screen name="SignOut" component={SignOut} />
         </Drawer.Navigator>

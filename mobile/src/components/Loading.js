@@ -9,8 +9,6 @@ const Loading = () => {
     );
 };
 
-export default Loading
-
 const styles = StyleSheet.create({
     loadingwrap: {
         flex: 1,
@@ -18,3 +16,5 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 });
+
+export default Loading;

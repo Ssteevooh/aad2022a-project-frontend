@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
 import { setContext } from 'apollo-link-context';
 import * as SecureStore from 'expo-secure-store';
+import { UserProvider } from './context/UserContext';
 
 import Screens from './src/screens/index';
 
@@ -29,10 +30,12 @@ const client = new ApolloClient({
 
 export default function App() {
     return (
-        <ApolloProvider client={client}>
-            <NavigationContainer>
-                <Screens />
-            </NavigationContainer>
-        </ApolloProvider>
+        <UserProvider>
+            <ApolloProvider client={client}>
+                <NavigationContainer>
+                    <Screens />
+                </NavigationContainer>
+            </ApolloProvider>
+        </UserProvider>
     );
 };

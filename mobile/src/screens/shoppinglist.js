@@ -1,15 +1,29 @@
 import React from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
+import { useQuery, gql } from '@apollo/client';
+import {Loading} from '../components/Loading'
+
+import ShoppingListComponent from "../components/ShoppingList";
+
+const GET_MY_SHOPPING_LISTS = gql`
+query {
+  getMyShoppingLists {
+    id
+    name
+    locked
+    createdAt
+  }
+}
+`;
 
 const ShoppingList = ({ navigation }) => {
+
+  const { loading, error, data } = useQuery(GET_MY_SHOPPING_LISTS);
+  if (loading) return <Text>Loading...</Text>//<Loading />;
+  if (error) return <Text>Error loading notes</Text>;
+  console.log(data.getMyShoppingLists);
   return (
-    <View style={styles.center}>
-      <Text>This is Shopping List</Text>
-      <Button
-        title="Go to About Screen"
-        onPress={() => navigation.navigate("Item")}
-      />
-    </View>
+    <ShoppingListComponent shoppingLists={data.getMyShoppingLists} navigation={navigation} />
   );
 };
 
