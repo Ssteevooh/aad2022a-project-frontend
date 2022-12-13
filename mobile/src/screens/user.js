@@ -33,8 +33,7 @@ const User = () => {
     }
   }
   `
-  
- 
+
   const userDataQuery = useQuery(GET_USER_DATA)
   const [updateDataFunction, updateResult] = useMutation(UPDATE_USER_DATA);
   const [acceptInvite, inviteResult] = useMutation(ACCEPT_INVITE);
@@ -102,10 +101,10 @@ const User = () => {
       <View style={styles.center}>
         <Text style={styles.text}>Family invitations:</Text>
           {
-            userDataQuery.data.me.invitations.map(inv => {
+            userDataQuery?.data?.me?.invitations?.map(inv => {
               return (
                 <View>
-                  <Text>Family name: {inv.family_name}</Text>
+                  <Text>Family name: {inv?.family_name}</Text>
                   <Button 
                     style={styles.button}
                     title="Accept invite"
