@@ -70,7 +70,6 @@ const User = () => {
   return (
     <ScrollView>
       <View style={styles.center}>
-        <Text style={styles.text}>Avatar:</Text>
           <Image
             style={styles.avatar}
             source={{
@@ -98,18 +97,19 @@ const User = () => {
           }}
         />
       </View>
+      {userDataQuery?.data?.me?.invitations.length > 0 &&
       <View style={styles.center}>
         <Text style={styles.text}>Family invitations:</Text>
           {
-            userDataQuery?.data?.me?.invitations?.map(inv => {
+            userDataQuery?.data?.me?.invitations?.map((inv, index) => {
               return (
-                <View>
-                  <Text>Family name: {inv?.family_name}</Text>
+                <View key={'View' + index}>
+                  <Text key={'Text' + index}>Family name: {inv?.family_name}</Text>
                   <Button 
+                    key={'Button' + index}
                     style={styles.button}
                     title="Accept invite"
                     onPress={() => {
-                      console.log(inv);
                         acceptInvite({variables: {family_id: inv.id}}).then(() => {
                           userDataQuery.refetch();
                         })
@@ -121,13 +121,15 @@ const User = () => {
             })
           }
       </View>
+      }
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 30
+    fontSize: 30,
+    minWidth: 200
   },
   center: {
     flex: 1,
@@ -140,10 +142,13 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
+    minWidth: 200
   },
   avatar: {
     width: 100,
     height: 100,
+    marginBottom: 10,
+    marginTop: 20,
   },
   button: {
     height: 80
