@@ -9,6 +9,7 @@ const User = () => {
     me {
       invitations {
         family_name
+        id
       }
       avatar
       name
@@ -26,8 +27,8 @@ const User = () => {
   }
   `
   const ACCEPT_INVITE = gql`
-  mutation ($familyId: ID!) {
-    acceptFamily(family_id: $familyId) {
+  mutation AcceptFamily($family_id: ID!) {
+    acceptFamily(family_id: $family_id) {
       family_name
     }
   }
@@ -42,11 +43,14 @@ const User = () => {
   const [userEmail, setUserEmail] = useState("Email");
 
   useEffect(() => {
-      
-  }, []);
+      if (userDataQuery.data) {
+        setUserEmail(userDataQuery.data.me.email);
+        setUserName(userDataQuery.data.me.name);
+      }
+  }, [userDataQuery.data]);
 
-  const showAlert = (result) => {
-    if(result) {
+  const showAlert = (err) => {
+    if(err === undefined) {
       Alert.alert(
         "Message:",
         "Updated successfully",
@@ -77,21 +81,21 @@ const User = () => {
         <Text style={styles.text}>Username:</Text>
         <TextInput
           style={styles.input}
-          onChangeText={setUserName}
-          value={userDataQuery.data.me.name}
+          onChangeText={(text) => setUserName(text)}
+          value={userName}
         />
         <Text style={styles.text}>Email:</Text>
         <TextInput
           style={styles.input}
-          onChangeText={setUserEmail}
-          value={userDataQuery.data.me.email}
+          onChangeText={(text) => setUserEmail(text)}
+          value={userEmail}
         />
         <Button
           style={styles.button}
           title="Update"
           onPress={() => {
             updateDataFunction({variables: {name: userName, email: userEmail}})
-            showAlert(updateResult.data)
+              .then(() => {showAlert(updateResult.error); userDataQuery.refetch()})
           }}
         />
       </View>
@@ -106,8 +110,10 @@ const User = () => {
                     style={styles.button}
                     title="Accept invite"
                     onPress={() => {
-                        acceptInvite({variables: {familyId: inv.familyId}})
-                         //TODO
+                      console.log(inv);
+                        acceptInvite({variables: {family_id: inv.id}}).then(() => {
+                          userDataQuery.refetch();
+                        })
                       }
                     } 
                   />

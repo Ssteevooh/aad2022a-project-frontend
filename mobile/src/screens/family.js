@@ -40,12 +40,8 @@ const Family = () => {
   const [createFamilyFunction, createResult] = useMutation(CREATE_FAMILY);
   const [familyName, setFamilyName] = useState(null);
 
-  useEffect(() => {
-    refetch();
-  }, [leaveResult, createResult, update])
-
   if (loading) return <Text> Loading...</Text>
-  if (error) return <Text> Error...</Text>
+  if (error) { console.log(error); return <Text> Error...</Text>;}
   if (data?.getMyFamily) {
     return (
       <View style={styles.center}>
@@ -78,7 +74,7 @@ const Family = () => {
           })}
         </View>
         <View>
-          <Button title="Leave family" onPress={() => {leaveFamilyFunction(); setUpdate(!update)}}/>
+          <Button title="Leave family" onPress={() => {leaveFamilyFunction(); setUpdate(!update); refetch();}}/>
         </View>
       </View>
     );
@@ -96,7 +92,7 @@ const Family = () => {
           placeholder="Family name"
         />
         <View>
-          <Button title="Create" onPress={() => {createFamilyFunction({variables: {family_name: familyName}}); setUpdate(!update)}}/>
+          <Button title="Create" onPress={() => {createFamilyFunction({variables: {family_name: familyName}}); setUpdate(!update); refetch();}}/>
         </View>
       </View>
 

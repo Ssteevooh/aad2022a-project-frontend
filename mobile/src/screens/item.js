@@ -7,66 +7,79 @@ import Modal from "react-native-modal";
 import SelectDropdown from 'react-native-select-dropdown'
 
 const GET_SHOPPING_LIST_CONTENT = gql`
-  query ($shopping_list_id: ID!){
+  query($shopping_list_id: ID!) {
     getShoppingListContent(shopping_list_id: $shopping_list_id) {
-      item {
-        name
-        price
-        description
-        id
-      }
-      collected
+      name
       notes
+      price
       quantity
       id
-    }
-  }
-`;
-
-const GET_ITEMS = gql`
-  query Query {
-    getItems {
-      name
-      id
-      description
+      collected
     }
   }
 `;
 
 const CREATE_LIST_ITEM = gql`
-  mutation Mutation($shopping_list_id: ID!, $item_id: ID!, $quantity: Int) {
-    createListItem(shopping_list_id: $shopping_list_id, item_id: $item_id, quantity: $quantity) {
-      item {
-        id
-        name
-      }
+  mutation Mutation($shopping_list_id: ID!, $name: String!, $price: String, $quantity: String, $notes: String) {
+    createListItem(shopping_list_id: $shopping_list_id, name: $name, price: $price, quantity: $quantity, notes: $notes) {
+      id
+      name
     }
   }
 `;
 
+const UPDATE_LIST_ITEM = gql`
+  mutation($shopping_list_id: ID!, $list_item_id: ID!, $name: String!, $price: String, $quantity: String, $collected: Boolean, $notes: String) {
+    updateListItem(shopping_list_id: $shopping_list_id, list_item_id: $list_item_id, name: $name, price: $price, quantity: $quantity, collected: $collected, notes: $notes) {
+      id
+      name
+    }
+  }
+`;
+
+const DELETE_LIST_ITEM = gql`
+  mutation DeleteListItem($list_item_id: ID!, $shopping_list_id: ID!) {
+    deleteListItem(list_item_id: $list_item_id, shopping_list_id: $shopping_list_id)
+  }
+`
+
 const Item = props => {
   const shopping_list_id = props.route.params.id;
+  const shoppingListIsLocked = props.route.params.locked;
+
+  console.log(shoppingListIsLocked);
 
   const [open, setOpen] = useState(false);
 
-  const [newListItem, setNewListItem] = useState({});
-  const [newListItemQuantity, setNewListItemQuantity] = useState(1);
-  const [listItemOptions, setListItemOptions] = useState();
+  const [newListItemName, setNewListItemName] = useState(null);
+  const [newListItemPrice, setNewListItemPrice] = useState(null);
+  const [newListItemQuantity, setNewListItemQuantity] = useState(null);
+  const [newListItemNotes, setNewListItemNotes] = useState(null);
+  const [collected, setCollected] = useState(0);
+  const [total, setTotal] = useState(0)
 
-  const listItemQuery = useQuery(GET_ITEMS);
-  const shoppingListQuery = useQuery(GET_SHOPPING_LIST_CONTENT, { variables: { shopping_list_id }});
+  const [editListItem, setEditListItem] = useState({});
+  const [editListItemModal, setEditListItemModal] = useState(false);
+
+  const shoppingListQuery = useQuery(GET_SHOPPING_LIST_CONTENT, { variables: { shopping_list_id } });
   const [createListItemFunction, { data, loading, error }] = useMutation(CREATE_LIST_ITEM);
+  const [updateListItemFunction, updateListItemFunctionResult] = useMutation(UPDATE_LIST_ITEM);
+  const [deleteListItemFunction, deleteListItemFunctionResult] = useMutation(DELETE_LIST_ITEM);
 
   useEffect(() => {
-    if (open && listItemQuery.data) {
-      let tempList = [];
-      for (let index = 0; index < listItemQuery.data.getItems.length; index++) {
-        const element = listItemQuery.data.getItems[index];
-        tempList.push(element.name);
+    if (shoppingListQuery.data) {
+      let tempTotal = 0;
+      let tempCollected = 0;
+      for (let index = 0; index < shoppingListQuery.data.getShoppingListContent.length; index++) {
+        const element = shoppingListQuery.data.getShoppingListContent[index];
+        tempTotal = tempTotal + 1;
+        if (element.collected) tempCollected = tempCollected + 1;
+
       }
-      setListItemOptions([...tempList])
+      setTotal(tempTotal);
+      setCollected(tempCollected);
     }
-  }, [open])
+  }, [shoppingListQuery.data])
 
   if (shoppingListQuery.loading) return <Text> Loading...</Text>
   if (shoppingListQuery.error) {
@@ -76,54 +89,108 @@ const Item = props => {
     <>
       <View style={styles.center}>
         <View>
+
           {shoppingListQuery.data &&
-          <FlatList
-            data={shoppingListQuery.data.getShoppingListContent}
-            keyExtractor={({ id }) => id.toString()}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  console.log(item);
-                }
-                }
-              >
-                <View style={styles.feedView}>
-                  <Text> {item.item.name} </Text>
-                  <Text> Quantity: {item.quantity} </Text>
-                  <Text> {item.collected ? 'Collected': 'Needs to collected'} </Text>
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        }
+            <>
+              <Text style={{
+                fontWeight: "600",
+                fontSize: 18,
+                color: collected === total ? 'green' : "red",
+                marginBottom: 2,
+                borderBottomWidth: 1,
+                borderBottomColor: '#00000051',
+              }}> Items collected {collected}/{total} </Text>
+              <FlatList
+                data={shoppingListQuery.data.getShoppingListContent}
+                keyExtractor={({ id }) => id.toString()}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onLongPress={() => {
+                      setEditListItem(item);
+                      setEditListItemModal(true);
+                    }}
+                    onPress={
+                      () => {
+                        if (!shoppingListIsLocked) {
+                          const requestBody = {
+                            list_item_id: item.id,
+                            shopping_list_id: shopping_list_id,
+                            name: item.name,
+                            price: item.price,
+                            quantity: item.quantity,
+                            notes: item.notes,
+                            collected: !item.collected,
+                          }
+
+                          updateListItemFunction({
+                            variables: requestBody
+                          }).then(() => {
+                            shoppingListQuery.refetch();
+                            setEditListItemModal(false);
+                          })
+                        }
+                      }}
+                  >
+                    <View style={styles.feedView}>
+                      <Text style={{ fontSize: 20, fontWeight: "600" }}> {item.name} </Text>
+                      <Text style={styles.bold}>Quantity: {item.quantity} </Text>
+                      <Text style={styles.bold}>Price: {item.price} </Text>
+                      <Text style={styles.bold}>Notes: {item.notes || ' - '} </Text>
+                      <Text style={item.collected ? styles.boldGreen : styles.boldRed}> {item.collected ? 'Collected' : 'Needs to collected'} </Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            </>
+          }
         </View>
       </View>
-      <Button style={styles.button} onPress={() => setOpen(!open)} title="Add list item" />
-      <Modal isVisible={open} onModalHide={() => {
-        setNewListItem({});
-        setNewListItemQuantity(1);
+      {!shoppingListIsLocked &&
+        <Button style={styles.button} onPress={() => setOpen(!open)} title="Add list item" />
+      }
+      <Modal style={styles.modal} isVisible={open && !shoppingListIsLocked} onModalHide={() => {
+        setNewListItemName(null);
+        setNewListItemNotes(null);
+        setNewListItemPrice(null);
+        setNewListItemQuantity(null);
       }}>
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
-          <SelectDropdown
-            data={listItemOptions}
-            onSelect={(selectedItem, index) => {
-              setNewListItem(listItemQuery.data.getItems[index].id)
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem
-            }}
-            rowTextForSelection={(item, index) => {
-              return item
-            }}
-          />
+        <View >
           <View style={styles.formWrapper}>
-
+            <Text style={styles.formlabel}>Item</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={text => setNewListItemName(text)}
+              value={newListItemName}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
+            <Text style={styles.formlabel}>Price</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={price => setNewListItemPrice(price)}
+              value={newListItemPrice}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
             <Text style={styles.formlabel}>Quantity</Text>
             <TextInput style={styles.styledinput}
-              onChangeText={number => setNewListItemQuantity(number)}
+              onChangeText={quantity => setNewListItemQuantity(quantity)}
               value={newListItemQuantity}
-              keyboardType='number-pad'
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
+            <Text style={styles.formlabel}>Notes</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={note => setNewListItemNotes(note)}
+              value={newListItemNotes}
               autoCapitalize="none"
             />
           </View>
@@ -135,18 +202,116 @@ const Item = props => {
           <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
             <Button onPress={
               () => {
+                const requestBody = {
+                  shopping_list_id: shopping_list_id,
+                  name: newListItemName,
+                  price: newListItemPrice,
+                  quantity: newListItemQuantity,
+                  notes: newListItemNotes,
+                }
                 createListItemFunction({
-                  variables: {
-                    shopping_list_id: shopping_list_id,
-                    item_id: newListItem,
-                    quantity: parseInt(newListItemQuantity)
-                  }
+                  variables: requestBody
                 }).then(data => {
                   shoppingListQuery.refetch();
                   setOpen(false);
                 })
               }}
-              disabled={!newListItem} style={styles.modalButton} title="Save"></Button>
+              disabled={!newListItemName} style={styles.modalButton} title="Save"></Button>
+          </View>
+        </View>
+      </Modal>
+      <Modal style={styles.modal} isVisible={editListItemModal && !shoppingListIsLocked} onModalHide={() => {
+        setEditListItem({})
+      }}>
+        <View >
+          <View style={styles.collectWrapper}>
+            <Button style={styles.collectButton}
+              title={editListItem.collected ? 'UnCollect' : 'Collect'}
+              onPress={() => setEditListItem({ ...editListItem, collected: !editListItem.collected })}
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
+            <Text style={styles.formlabel}>Item</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={name => setEditListItem({ ...editListItem, name: name })}
+              value={editListItem.name}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
+            <Text style={styles.formlabel}>Price</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={price => setEditListItem({ ...editListItem, price: price })}
+              value={editListItem.price}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
+            <Text style={styles.formlabel}>Quantity</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={quantity => setEditListItem({ ...editListItem, quantity: quantity })}
+              value={editListItem.quantity}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View >
+          <View style={styles.formWrapper}>
+            <Text style={styles.formlabel}>Notes</Text>
+            <TextInput style={styles.styledinput}
+              onChangeText={note => setEditListItem({ ...editListItem, notes: note })}
+              value={editListItem.notes}
+              autoCapitalize="none"
+            />
+          </View>
+        </View>
+        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+          <View style={[{ width: "30%", margin: 5, padding: 10 }]}>
+            <Button onPress={
+              () => {
+                const requestBody = {
+                  list_item_id: editListItem.id,
+                  shopping_list_id: shopping_list_id,
+                }
+                deleteListItemFunction({
+                  variables: requestBody
+                }).then(() => {
+                  shoppingListQuery.refetch();
+                  setEditListItemModal(false);
+                })
+              }} color={"#ff000055"} style={styles.modalButton} title="Delete"></Button>
+          </View>
+
+          <View style={[{ width: "30%", margin: 5, padding: 10 }]}>
+            <Button onPress={
+              () => {
+                const requestBody = {
+                  list_item_id: editListItem.id,
+                  shopping_list_id: shopping_list_id,
+                  name: editListItem.name,
+                  price: editListItem.price,
+                  quantity: editListItem.quantity,
+                  notes: editListItem.notes,
+                  collected: editListItem.collected,
+                }
+                console.log(requestBody);
+                updateListItemFunction({
+                  variables: requestBody
+                }).then(() => {
+                  shoppingListQuery.refetch();
+                  setEditListItemModal(false);
+                })
+              }}
+              disabled={!editListItem.name} style={styles.modalButton} title="Update"></Button>
+          </View>
+          <View style={[{ width: "30%", margin: 5, padding: 10 }]}>
+            <Button style={styles.modalButton} onPress={() => setEditListItemModal(false)} title="Close" />
           </View>
         </View>
       </Modal>
@@ -174,24 +339,32 @@ const styles = StyleSheet.create({
     border: 1,
     fontSize: 18,
     padding: 8,
-    marginBottom: 24,
-    backgroundColor: '#8C888855',
+    borderWidth: 1,
+    borderColor: '#00000001',
     width: '66%',
-    height: 50
+    height: 50,
+    borderTopRightRadius: 5,
+    borderBottomRightRadius: 5,
+    backgroundColor: 'white'
   },
   formlabel: {
     fontSize: 18,
     fontWeight: "bold",
-    backgroundColor: '#8C8888BB',
     width: '34%',
     height: 50,
     display: 'flex',
     textAlignVertical: 'center',
     textAlign: "center",
+    borderWidth: 1,
+    borderColor: '#00000001',
+    borderTopLeftRadius: 5,
+    borderBottomLeftRadius: 5,
+    backgroundColor: 'white'
   },
   formWrapper: {
     display: 'flex',
     flexDirection: 'row',
+    marginBottom: 3,
   },
   separator: {
     height: 1,
@@ -199,12 +372,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#ced0ce'
   },
   feedView: {
-    height: 100,
     width: 300,
+    padding: 5,
+    borderRadius: 6,
+    marginBottom: 5,
+    marginTop: 5,
     overflow: 'hidden',
+    backgroundColor: "#00000011",
+    borderWidth: 1,
+    borderColor: '#00000021',
+  },
+  modal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  collectWrapper: {
+    width: 200,
     marginBottom: 10,
-    backgroundColor: "#ced0ce"
-}
+  },
+  bold: {
+    fontWeight: "500",
+    marginLeft: 10,
+  },
+  boldGreen: {
+    fontWeight: "500",
+    marginLeft: 10,
+    color: "green"
+  },
+  boldRed: {
+    fontWeight: "500",
+    marginLeft: 10,
+    color: "red"
+  },
 });
 
 export default Item;
