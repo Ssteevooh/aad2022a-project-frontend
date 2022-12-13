@@ -8,6 +8,7 @@ import { UserProvider } from './context/UserContext';
 import Screens from './src/screens/index';
 
 import getEnvVars from './config';
+import { useEffect } from 'react';
 
 const { API_URI } = getEnvVars();
 
@@ -32,8 +33,8 @@ export default function App() {
     return (
         <UserProvider>
             <ApolloProvider client={client}>
-                <NavigationContainer>
-                    <Screens />
+                <NavigationContainer client={client}>
+                    <Screens client={client}/>
                 </NavigationContainer>
             </ApolloProvider>
         </UserProvider>

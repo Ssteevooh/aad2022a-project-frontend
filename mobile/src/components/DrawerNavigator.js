@@ -21,7 +21,7 @@ function CustomDrawerContent(props) {
         <DrawerContentScrollView {...props}>
             <DrawerItemList {...props} />
             <DrawerItem label="Logout" onPress={() => setLogoutOpen(!logoutOpen)} />
-            <Modal style={styles.modal} isVisible={logoutOpen} onPress={() => console.log('out')}>
+            <Modal style={styles.modal} isVisible={logoutOpen}>
                 <View style={styles.modalWrapper}>
                     <Text style={{ marginLeft: 10 }}>...Are you sure you want to logout?</Text>
                     <View style={styles.buttonWrapper}>
@@ -39,7 +39,7 @@ function CustomDrawerContent(props) {
     );
 }
 
-const AuthenticatedDrawerScreen = () => {
+const AuthenticatedDrawerScreen = (props) => {
     return (
         <Drawer.Navigator initialRouteName="Shopping Lists" drawerContent={props => <CustomDrawerContent {...props} />}>
             <Drawer.Screen name='Shopping Lists' component={ShoppingListStackScreen} options={{ title: 'Shopping Lists' }} />
