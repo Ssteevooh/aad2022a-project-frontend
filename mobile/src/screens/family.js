@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Button, TextInput, FlatList, TouchableOpacity, Image } from "react-native";
 import { useQuery, useMutation, gql } from '@apollo/client';
 
+import Modal from "react-native-modal";
+
 const GET_MY_FAMILY = gql`
   query GetMyFamily {
     getMyFamily {
@@ -33,11 +35,34 @@ const CREATE_FAMILY = gql`
   }
 `;
 
+const USERS_TO_INVITE = gql`
+  query Query {
+    usersToInvite {
+      id
+      name
+      avatar
+    }
+  }
+`;
+
+const INVITE_MEMBER_TO_FAMILY = gql`
+  mutation Mutation($user_id: ID!) {
+    inviteMember(user_id: $user_id)
+  }
+`;
+
 const Family = () => {
+
+  const [open, setOpen] = useState(false);
   const [update, setUpdate] = useState(false);
+
   const { data, loading, error, refetch } = useQuery(GET_MY_FAMILY);
+  const usersToInviteResults = useQuery(USERS_TO_INVITE);
+
   const [leaveFamilyFunction, leaveResult] = useMutation(LEAVE_FAMILY);
   const [createFamilyFunction, createResult] = useMutation(CREATE_FAMILY);
+  const [inviteMemberFunction, inviteResult ] = useMutation(INVITE_MEMBER_TO_FAMILY);
+
   const [familyName, setFamilyName] = useState(null);
 
   useEffect(() => {
@@ -48,6 +73,7 @@ const Family = () => {
   if (error) return <Text> Error...</Text>
   if (data?.getMyFamily) {
     return (
+      <>
       <View style={styles.center}>
         <View style={styles.wrapperHeader}>
           <Text style={{ fontSize: 30 }}>FAMILY {data.getMyFamily.family_name}</Text>
@@ -81,6 +107,48 @@ const Family = () => {
           <Button title="Leave family" onPress={() => {leaveFamilyFunction(); setUpdate(!update)}}/>
         </View>
       </View>
+
+      <View>
+      <Button onPress={() => setOpen(!open)} title="Add New Member To Your Family" />
+      <Modal isVisible={open}>
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
+          <Text style={{ fontSize: 20 }}>MEMBERS WITHOUT FAMILY</Text>
+          <View>
+          {usersToInviteResults?.data?.usersToInvite?.map(user => {
+            return (
+              <>
+                <Text style={{ fontSize: 20 }}>Name: {user.name}</Text>
+                <Image
+                  style={styles.tinyLogo}
+                  source={{
+                    uri: user.avatar,
+                  }}
+                />
+            <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
+            <Button title="Add" onPress={
+              () => {
+                console.log(user)
+                inviteMemberFunction({
+                  variables: {
+                    user_id: user.id,
+                  }
+                }).then(data => {
+                  usersToInviteResults.refetch();
+                  setUpdate(!update)
+                })
+              }}
+              ></Button>
+          </View>
+              </>
+            )
+          })}
+          </View>
+          <Button title="Close" onPress={() => {refetch();setOpen(!open)}}/>
+        </View>
+      </Modal>
+      </View>
+
+      </>
     );
   } else {
     return (
@@ -98,6 +166,7 @@ const Family = () => {
         <View>
           <Button title="Create" onPress={() => {createFamilyFunction({variables: {family_name: familyName}}); setUpdate(!update)}}/>
         </View>
+
       </View>
 
     )
