@@ -47,8 +47,6 @@ const Item = props => {
   const shopping_list_id = props.route.params.id;
   const shoppingListIsLocked = props.route.params.locked;
 
-  console.log(shoppingListIsLocked);
-
   const [open, setOpen] = useState(false);
 
   const [newListItemName, setNewListItemName] = useState(null);
@@ -65,6 +63,13 @@ const Item = props => {
   const [createListItemFunction, { data, loading, error }] = useMutation(CREATE_LIST_ITEM);
   const [updateListItemFunction, updateListItemFunctionResult] = useMutation(UPDATE_LIST_ITEM);
   const [deleteListItemFunction, deleteListItemFunctionResult] = useMutation(DELETE_LIST_ITEM);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      shoppingListQuery.refetch();
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (shoppingListQuery.data) {
@@ -300,7 +305,6 @@ const Item = props => {
                   notes: editListItem.notes,
                   collected: editListItem.collected,
                 }
-                console.log(requestBody);
                 updateListItemFunction({
                   variables: requestBody
                 }).then(() => {

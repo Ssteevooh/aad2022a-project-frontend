@@ -66,7 +66,6 @@ const ShoppingListComponent = props => {
               title={!modalData?.locked ? 'Lock shopping list' : 'Unlock shopping list'}
               onPress={
                 () => {
-                  console.log(modalData.id);
                   toggleShoppingList({
                     variables: {
                       shopping_list_id: modalData.id,

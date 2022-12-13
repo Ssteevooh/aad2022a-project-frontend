@@ -12,7 +12,6 @@ export default function AllScreens(props) {
     useEffect(() => {
         if(!loggedIn) {
             props.client.clearStore();
-            console.log('here', loggedIn);
         }
     }, [loggedIn])
     return (
