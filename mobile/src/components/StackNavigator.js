@@ -22,8 +22,8 @@ const UnAuthenticatedStackScreen = () => {
 const ShoppingListStackScreen = () => {
     return (
         <Stack.Navigator initialRouteName='ShoppingList'>
-            <Stack.Screen name="ShoppingList" component={ShoppingList} />
-            <Stack.Screen name="Item" component={Item} />
+            <Stack.Screen name="ShoppingList" component={ShoppingList} options={{ title: "Your shopping lists" }} />
+            <Stack.Screen name="Item" component={Item} options={{ title: "Shopping list content" }} />
         </Stack.Navigator>
     );
 };

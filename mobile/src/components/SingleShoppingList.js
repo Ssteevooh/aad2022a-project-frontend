@@ -1,17 +1,15 @@
 import React from 'react';
-import { Text, ScrollView, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 import { format } from 'date-fns';
 
 
 const SingleShoppingList = ({ list }) => {
   return (
-    <ScrollView style={styles.listView}>
-      <Text>
-        Shopping list {list.name}
-      </Text>
-      <Text>Created: {format(new Date(list.createdAt), 'MMM do yyyy')}</Text>
-      <Text>Locked: {list.locked ? 'Yes' : 'No'}</Text>
-    </ScrollView>
+    <View style={styles.listView}>
+      <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 10}}>{list.name} </Text>
+      <Text style={{ fontSize: 14, fontWeight: "500"}}>Created: {format(new Date(list.createdAt), 'MMM do yyyy')}</Text>
+      <Text style={{ fontSize: 14, fontWeight: "500"}}>Locked: {list.locked ? 'Yes' : 'No'} </Text>
+    </View>
   );
 };
 
