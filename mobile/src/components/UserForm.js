@@ -23,7 +23,7 @@ const UserForm = props => {
         <View style={styles.formview}>
             {props.formType === 'signUp' && (
                 <View>
-                    <Text style={styles.formlabel}>Username</Text>
+                    <Text style={styles.formlabel}>Your Name</Text>
                     <TextInput style={styles.styledinput}
                         onChangeText={text => setName(text)}
                         value={name}
