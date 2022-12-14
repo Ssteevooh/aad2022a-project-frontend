@@ -111,7 +111,11 @@ const Family = ({ navigation }) => {
               })}
             </View>
             <View>
-              <Button title="Leave family" onPress={() => { leaveFamilyFunction(); setUpdate(!update); refetch(); }} />
+              <Button title="Leave family" onPress={
+                () => {leaveFamilyFunction()
+                  .then(() => refetch())
+                    .then(() => setUpdate(!update))
+              }} />
             </View>
           </View>
         </ScrollView>
@@ -150,7 +154,7 @@ const Family = ({ navigation }) => {
                   )
                 })}
               </View>
-              <Button title="Close" onPress={() => { refetch(); setOpen(!open) }} />
+              <Button title="Close" onPress={() => { refetch().then(() => setOpen(!open))  }} />
             </View>
           </Modal>
         </View>
@@ -170,7 +174,11 @@ const Family = ({ navigation }) => {
           placeholder="Family name"
         />
         <View>
-          <Button title="Create" onPress={() => { createFamilyFunction({ variables: { family_name: familyName } }); setUpdate(!update); refetch(); }} />
+          <Button title="Create" onPress={
+            () => { createFamilyFunction({ variables: { family_name: familyName } })
+              .then(() => { refetch()})
+                .then(() => {setUpdate(!update)})
+            }} />
         </View>
 
       </View>

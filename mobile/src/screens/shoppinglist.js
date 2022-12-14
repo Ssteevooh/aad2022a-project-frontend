@@ -35,35 +35,41 @@ const GET_ME = gql`
 query Query {
   me {
     name
-    family {
+  }
+}
+`;
+
+const GET_MY_FAMILY = gql`
+  query GetMyFamily {
+    getMyFamily {
+      family_name
       id
     }
   }
-}
 `;
 
 const ShoppingList = ({ navigation }) => {
   const [open, setOpen] = useState(false);
   const [ShoppingListName, setShoppingListName] = useState(null);
   const { loading, error, data, refetch } = useQuery(GET_MY_SHOPPING_LISTS);
+  const familyResults = useQuery(GET_MY_FAMILY);
   const me = useQuery(GET_ME);
   const [createShoppingList, createShoppingListResult] = useMutation(CREATE_SHOPPING_LIST);
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      me.refetch();
-      refetch();
+      me.refetch().then(() => refetch().then(() => familyResults.refetch()))
     });
     return unsubscribe;
   }, [navigation]);
 
-  if (loading || me.loading) return <Text>Loading...</Text>;
-  if (error || me.error) {
+  if (loading || me.loading || familyResults.loading) return <Text>Loading...</Text>;
+  if (error || me.error || familyResults.error) {
     return <Text>Error loading shopping lists</Text>;
   }
   return (
     <>
-      {me.data.me.family.id ?
+      {familyResults.data.getMyFamily ?
         <>
           <View style={{ maxHeight: '94%' }}>
             <ShoppingListComponent shoppingLists={data.getMyShoppingLists} me={me.data} navigation={navigation} refetch={() => refetch()} />
