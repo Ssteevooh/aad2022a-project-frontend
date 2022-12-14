@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, TextInput, Image, Button, Alert, ScrollView } f
 import { useQuery, useMutation, gql } from '@apollo/client';
 
 
-const User = () => {
+const User = ({navigation}) => {
   const GET_USER_DATA = gql`
   query {
     me {
@@ -40,6 +40,13 @@ const User = () => {
 
   const [userName, setUserName] = useState("User");
   const [userEmail, setUserEmail] = useState("Email");
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      userDataQuery.refetch();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
       if (userDataQuery.data) {
@@ -97,7 +104,7 @@ const User = () => {
           }}
         />
       </View>
-      {userDataQuery?.data?.me?.invitations.length > 0 &&
+      {userDataQuery?.data?.me?.invitations.length > 0 ?
       <View style={styles.center}>
         <Text style={styles.text}>Family invitations:</Text>
           {
@@ -120,6 +127,10 @@ const User = () => {
               )
             })
           }
+      </View>
+      : 
+      <View style={{marginTop: 50}}>
+        <Text style={styles.center}> No invitations...</Text>
       </View>
       }
     </ScrollView>

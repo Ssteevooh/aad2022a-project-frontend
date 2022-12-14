@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, TextInput } from "react-native";
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { Loading } from '../components/Loading'
 import Modal from "react-native-modal";
+import { Link } from '@react-navigation/native';
 
 import ShoppingListComponent from "../components/ShoppingList";
 
@@ -31,60 +32,84 @@ mutation Mutation($name: String) {
 `;
 
 const GET_ME = gql`
-  query Query {
-    me {
+query Query {
+  me {
+    name
+    family {
       id
     }
   }
+}
 `;
 
 const ShoppingList = ({ navigation }) => {
-
   const [open, setOpen] = useState(false);
   const [ShoppingListName, setShoppingListName] = useState(null);
   const { loading, error, data, refetch } = useQuery(GET_MY_SHOPPING_LISTS);
   const me = useQuery(GET_ME);
   const [createShoppingList, createShoppingListResult] = useMutation(CREATE_SHOPPING_LIST);
-  if (loading || me.loading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error loading shopping lists</Text>;
 
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      me.refetch();
+      refetch();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  if (loading || me.loading) return <Text>Loading...</Text>;
+  if (error || me.error) {
+    return <Text>Error loading shopping lists</Text>;
+  }
   return (
     <>
-      <View style={{maxHeight: '94%'}}>
-        <ShoppingListComponent shoppingLists={data.getMyShoppingLists} me={me.data} navigation={navigation} refetch={() => refetch()}/>
-      </View>
-      <Button style={styles.button} title="Create shopping list" onPress={() => setOpen(true)}/>
-      <Modal isVisible={open} style={styles.modal} onModalHide={() => {
-        setShoppingListName(null);
-      }}>
-        <View style={{ width: '100%' }}>
-            <Text style={{fontSize: 18, marginLeft: 10}}>Shopping list name</Text>
-            <TextInput style={styles.styledinput}
-              onChangeText={text => setShoppingListName(text)}
-              value={ShoppingListName}
-              autoCapitalize=""
-            />
-        </View>
-        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-          <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
-            <Button style={styles.modalButton} onPress={() => setOpen(!open)} title="Close" />
+      {me.data.me.family.id ?
+        <>
+          <View style={{ maxHeight: '94%' }}>
+            <ShoppingListComponent shoppingLists={data.getMyShoppingLists} me={me.data} navigation={navigation} refetch={() => refetch()} />
           </View>
-          <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
-          <Button onPress={
-              () => {
-                createShoppingList({
-                  variables: {
-                    name: ShoppingListName,
-                  }
-                }).then(() => {
-                  refetch();
-                  setOpen(false);
-                })
-              }}
-              disabled={!ShoppingListName} style={styles.modalButton} title="Save"></Button>
-          </View>
+          <Button style={styles.button} title="Create shopping list" onPress={() => setOpen(true)} />
+          <Modal isVisible={open} style={styles.modal} onModalHide={() => {
+            setShoppingListName(null);
+          }}>
+            <View style={{ width: '100%' }}>
+              <Text style={{ fontSize: 18, marginLeft: 10 }}>Shopping list name</Text>
+              <TextInput style={styles.styledinput}
+                onChangeText={text => setShoppingListName(text)}
+                value={ShoppingListName}
+                autoCapitalize=""
+              />
+            </View>
+            <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+              <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
+                <Button style={styles.modalButton} onPress={() => setOpen(!open)} title="Close" />
+              </View>
+              <View style={[{ width: "40%", margin: 10, padding: 10 }]}>
+                <Button onPress={
+                  () => {
+                    createShoppingList({
+                      variables: {
+                        name: ShoppingListName,
+                      }
+                    }).then(() => {
+                      refetch();
+                      setOpen(false);
+                    })
+                  }}
+                  disabled={!ShoppingListName} style={styles.modalButton} title="Save"></Button>
+              </View>
+            </View>
+          </Modal>
+        </> :
+        <View style={styles.center}>
+          <Text style={{ fontSize: 18, fontWeight: "500" }}> You don't belong to any family...</Text>
+          <Text> </Text>
+          <Text> Visit <Link to={{ screen: 'Family' }} style={{ fontWeight: "500", color: "blue" }}> Family page </Link>to create one</Text>
+          <Text> </Text>
+          <Text> Or check if you have invitations in <Link to={{ screen: 'User' }} style={{ fontWeight: "500", color: "blue" }}>user page</Link></Text>
         </View>
-      </Modal>
+
+      }
     </>
   );
 };

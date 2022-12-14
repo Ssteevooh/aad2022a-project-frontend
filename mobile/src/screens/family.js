@@ -51,7 +51,7 @@ const INVITE_MEMBER_TO_FAMILY = gql`
   }
 `;
 
-const Family = () => {
+const Family = ({ navigation }) => {
 
   const [open, setOpen] = useState(false);
   const [update, setUpdate] = useState(false);
@@ -64,50 +64,58 @@ const Family = () => {
   const [inviteMemberFunction, inviteResult] = useMutation(INVITE_MEMBER_TO_FAMILY);
 
   const [familyName, setFamilyName] = useState(null);
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      usersToInviteResults.refetch();
+      refetch();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   if (loading) return <Text> Loading...</Text>
   if (error) { return <Text> Error...</Text>; }
   if (data?.getMyFamily) {
     return (
       <>
-      <ScrollView>
-        <View style={styles.center}>
-          <View style={styles.wrapperHeader}>
-            <Text style={{ fontSize: 30 }}>FAMILY {data.getMyFamily.family_name}</Text>
+        <ScrollView>
+          <View style={styles.center}>
+            <View style={styles.wrapperHeader}>
+              <Text style={{ fontSize: 30 }}>FAMILY {data.getMyFamily.family_name}</Text>
+            </View>
+            <Text style={{ fontSize: 30, margin: 10 }}>Owner</Text>
+            <View style={styles.wrapper}>
+              <Text style={{ fontSize: 20 }}>{data.getMyFamily.owner.name}</Text>
+              <Image
+                style={styles.tinyLogo}
+                source={{
+                  uri: data.getMyFamily.owner.avatar,
+                }}
+              />
+            </View>
+            <Text style={{ fontSize: 30, marginBottom: 10 }}>Members</Text>
+            <View style={styles.memberWrapper}>
+              {data.getMyFamily.members.map((member, index) => {
+                return (
+                  <View key={'View' + index} style={styles.members}>
+                    <Text key={'text' + index} style={{ fontSize: 20, paddingTop: 15 }}>{member.name}</Text>
+                    <Image
+                      key={'image' + index}
+                      style={styles.tinyLogo}
+                      source={{
+                        uri: member.avatar,
+                      }}
+                    />
+                  </View>
+                )
+              })}
+            </View>
+            <View>
+              <Button title="Leave family" onPress={() => { leaveFamilyFunction(); setUpdate(!update); refetch(); }} />
+            </View>
           </View>
-          <Text style={{ fontSize: 30, margin: 10 }}>Owner</Text>
-          <View style={styles.wrapper}>
-            <Text style={{ fontSize: 20 }}>{data.getMyFamily.owner.name}</Text>
-            <Image
-              style={styles.tinyLogo}
-              source={{
-                uri: data.getMyFamily.owner.avatar,
-              }}
-            />
-          </View>
-          <Text style={{ fontSize: 30, marginBottom: 10 }}>Members</Text>
-          <View style={styles.memberWrapper}>
-            {data.getMyFamily.members.map((member, index) => {
-              return (
-                <View style={styles.members}>
-                  <Text key={'text' + index} style={{ fontSize: 20, paddingTop: 15 }}>{member.name}</Text>
-                  <Image
-                    key={'image' + index}
-                    style={styles.tinyLogo}
-                    source={{
-                      uri: member.avatar,
-                    }}
-                  />
-                </View>
-              )
-            })}
-          </View>
-          <View>
-            <Button title="Leave family" onPress={() => { leaveFamilyFunction(); setUpdate(!update); refetch(); }} />
-          </View>
-        </View>
-      </ScrollView>
-        
+        </ScrollView>
+
         <View>
           <Button onPress={() => setOpen(!open)} title="Add New Member To Your Family" />
           <Modal isVisible={open}>
